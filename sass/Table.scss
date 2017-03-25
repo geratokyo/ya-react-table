@@ -33,16 +33,10 @@ $table-cell-border-color: #cacaca;
 	box-sizing: border-box;
 }
 
-body {
-    padding: 0;
-    margin: 0;
+.component {
+    display: block;
+    margin: 20px;
 }
-
-// #container {
-//     height: 500px;
-//     width: 50%;
-//     overflow: auto;
-// }
 
 .table-component {
     display: block;
@@ -55,13 +49,6 @@ body {
     border-width: $table-border-width;
     border-style: $table-border-style;
     border-color: $table-border-color;  
-
-    -webkit-transform-style: preserve-3d;
-    -moz-transform-style: preserve-3d;
-    -ms-transform-style: preserve-3d;
-    transform-style: preserve-3d;  
-
-    position: relative;
         
     * {
         @extend %box;
@@ -71,6 +58,10 @@ body {
         width: auto;
         max-width: 100%;
         overflow-y: auto;
+    }
+
+    .table-holder {
+        position: relative;
     }
 
     .table {
@@ -102,11 +93,11 @@ body {
             font-weight: $table-head-font-weight;
             line-height: $table-head-line-height;            
             color: $table-head-text-color;
-            background: $table-head-background-color;
 
             .row {
                 .cell {
                     border-bottom: $table-head-border-width $table-head-border-style $table-head-border-color;                     
+                    background: $table-head-background-color;
                 }
             }             
         }

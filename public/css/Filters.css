@@ -1,0 +1,10 @@
+/* line 1, ../../sass/Filters.scss */
+.table-filters {
+  display: block;
+  margin-bottom: 20px;
+}
+/* line 5, ../../sass/Filters.scss */
+.table-filters select {
+  display: inline-block;
+  margin-right: 20px;
+}

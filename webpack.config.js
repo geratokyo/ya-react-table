@@ -5,6 +5,12 @@ module.exports = {
         path: __dirname + "/public/scripts/"
     },
 
+    // entry: "./src/Filters.tsx",
+    // output: {
+    //     filename: "Filters.js",
+    //     path: __dirname + "/public/scripts/"
+    // },    
+
     // Enable sourcemaps for debugging webpack's output.
     devtool: "source-map",
 

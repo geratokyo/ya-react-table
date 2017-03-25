@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 2);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -73,7 +73,8 @@
 module.exports = React;
 
 /***/ }),
-/* 1 */
+/* 1 */,
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -96,12 +97,12 @@ var Table = (function (_super) {
         var _this = _super.call(this, props) || this;
         _this.orderData = _this.orderData.bind(_this);
         _this.onResize = _this.onResize.bind(_this);
-        _this.onScroll = _this.onScroll.bind(_this);
+        _this.onParentScroll = _this.onParentScroll.bind(_this);
         _this.state = {
             head: props.hasHeaders ? props.data[0] : null,
-            data: props.hasHeaders ? props.data.slice(1) : props.data,
+            data: _this.originalData = props.hasHeaders ? props.data.slice(1) : props.data,
             order: false,
-            orderBy: ''
+            orderBy: '',
         };
         return _this;
     }
@@ -128,11 +129,12 @@ var Table = (function (_super) {
     Table.prototype.componentDidMount = function () {
         this.el = this.refs['table'];
         this.parentEl = this.el.parentElement;
+        this.tableHolderEl = this.refs['table-holder'];
         this.tableBodyEl = this.refs['table-body'];
         this.tableHeadEl = this.refs['table-head'];
         this.onResize();
-        window.addEventListener('resize', this.onResize);
-        this.props.stickyHeaders && (this.props.stickyTo ? this.props.stickyTo : window).addEventListener('scroll', this.onScroll);
+        this.props.stickyHeaders && (this.props.stickyTo ? this.props.stickyTo : window).addEventListener('scroll', this.onParentScroll);
+        this.el.addEventListener('resize', this.onResize);
     };
     Table.prototype.componentDidUpdate = function (nextProps) {
         if (nextProps.data !== this.props.data) {
@@ -141,40 +143,43 @@ var Table = (function (_super) {
     Table.prototype.onResize = function () {
         if (this.props.stickyHeaders) {
             var bodyCells = this.tableBodyEl.querySelectorAll('.table-head .cell'), headCells = this.tableHeadEl.querySelectorAll('.table-head .cell');
+            this.tableHeadEl.style.width = this.tableBodyEl.offsetWidth + 'px';
             for (var i = 0; i < bodyCells.length; i++) {
                 headCells[i].style.width = bodyCells[i].offsetWidth + 'px';
             }
         }
     };
-    Table.prototype.onScroll = function (e) {
-        var bb = this.el.getBoundingClientRect(), p = this.props.stickyTo ? this.props.stickyTo : document.body;
-        if (this.props.stickyTo) {
-            this.tableHeadEl.style.top = (bb.top - this.props.stickyTo.offsetTop < 0 ? this.props.stickyTo.offsetTop - bb.top : 0) + 'px';
-        }
-        else {
-            this.tableHeadEl.style.position = bb.top - document.body.offsetTop < 0 ? 'fixed' : 'absolute';
-        }
+    Table.prototype.onParentScroll = function (e) {
+        var bb = this.el.getBoundingClientRect(), hh = this.tableHeadEl.getBoundingClientRect(), p = this.props.stickyTo ? this.props.stickyTo : document.body;
+        this.tableHeadEl.style.top = (bb.top - p.offsetTop < 0 ? p.offsetTop - bb.top : 0) + 'px';
+    };
+    Table.prototype.formatter = function (e, key) {
+        return this.props.formatter &&
+            this.props.dataTypes &&
+            this.props.dataTypes[key] ? this.props.formatter(e, this.props.dataTypes[key]) : e;
+    };
+    Table.prototype.renderHead = function () {
+        var _this = this;
+        var head = this.state.head;
+        return (React.createElement("div", { className: "table-head" },
+            React.createElement("div", { className: "row" }, head && _(head).map(function (cell, i) {
+                return (React.createElement("div", { className: "cell", key: i, "data-index": i, "data-active": i == _this.state.orderBy, onClick: _this.orderData }, cell));
+            }).value())));
     };
     Table.prototype.render = function () {
         var _this = this;
-        var props = this.props, state = this.state, head = state.head, data = state.data, colWidth = 100 / _.size(head), clz = props.className || "", tableSettings = [props.style ? props.style : "",
-            props.enableHover ? "hover" : ""].join(" ");
+        var props = this.props, state = this.state, data = state.data, colWidth = 100 / _.size(state.head), clz = props.className || "", tableSettings = [props.style ? props.style : "", props.enableHover ? "hover" : ""].join(" ");
         return (React.createElement("div", { ref: "table", className: "table-component " + clz, "data-style": props.style, "data-enable-sort": props.enableSort, "data-enable-hover": props.enableHover, "data-sticky": props.stickyHeaders, "data-responsive": props.responsive, "data-order": this.state.order, "data-order-by": this.state.orderBy },
-            props.stickyHeaders && head &&
-                React.createElement("div", { ref: "table-head", className: "table th " },
-                    React.createElement("div", { className: "table-head" },
-                        React.createElement("div", { className: "row" }, _(head).map(function (col, i) { return (React.createElement("div", { className: "cell", key: i, "data-index": i, "data-active": i == _this.state.orderBy, onClick: _this.orderData },
-                            col,
-                            React.createElement("div", { className: "cell-fix" }))); }).value()))),
-            React.createElement("div", { ref: "table-body", className: "table tb " },
-                head &&
-                    React.createElement("div", { className: "table-head" },
-                        React.createElement("div", { className: "row" }, _(head).map(function (col, i) { return (React.createElement("div", { className: "cell", key: i, "data-index": i, "data-active": i == _this.state.orderBy, onClick: _this.orderData }, col)); }).value())),
-                React.createElement("div", { className: "table-body" }, data && data.map(function (row, i) {
-                    return (React.createElement("div", { className: "row", key: i }, _(row).map(function (col, e) {
-                        return (React.createElement("div", { className: "cell", key: e }, col));
-                    }).value()));
-                })))));
+            React.createElement("div", { ref: "table-holder", className: "table-holder" },
+                props.stickyHeaders && state.head &&
+                    React.createElement("div", { ref: "table-head", className: "table th " }, this.renderHead()),
+                React.createElement("div", { ref: "table-body", className: "table tb " },
+                    state.head && this.renderHead(),
+                    React.createElement("div", { className: "table-body" }, data && data.map(function (row, i) {
+                        return (React.createElement("div", { className: "row", key: i }, _(row).map(function (cell, e) {
+                            return (React.createElement("div", { className: "cell", key: e }, _this.formatter(cell, e)));
+                        }).value()));
+                    }))))));
     };
     return Table;
 }(React.Component));
